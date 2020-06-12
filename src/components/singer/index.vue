@@ -10,6 +10,7 @@
 <script type='text/ecmascript-6'>
   import ListView from 'base/listview'
   import {reqSingers} from 'api'
+  import {mapMutations} from 'vuex'
   import Singer from 'common/js/singer'
 
   const HOT_SINGER_LEN = 10
@@ -39,6 +40,7 @@
         this.$router.push({
           path: `/singer/${singer.id}`
         })
+        this.setSinger(singer)
       },
       _normalizeSinger(list) {
         let map = {
@@ -82,7 +84,10 @@
           return a.title.charCodeAt(0) - b.title.charCodeAt(0)
         })
         return hot.concat(ret)
-      }
+      },
+      ...mapMutations({
+        setSinger: 'SET_SINGER'
+      })
      
     },
     components: {

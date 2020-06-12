@@ -1,14 +1,19 @@
 <template>
-  <!-- <transition name="slide"> -->
-    <music-list></music-list>
-  <!-- </transition> -->
+    <music-list :bgImage="singer.avatar" :songs="songs"></music-list>
 </template>
 
 <script type="text/ecmascript-6">
-  import MusicList from 'components/music-list'
+  import {mapGetters} from 'vuex'
+  import MusicList from 'components/music-list' 
+  import {reqSingerDetail} from 'api'
+  import {createSong} from 'common/js/song.js'
   export default {
     name: 'SingerDetail',
+    
     computed: {
+      ...mapGetters([
+        'singer'
+      ])
     },
     data() {
       return {
@@ -17,13 +22,29 @@
       }
     },
     created() {
-     this.myRouter = this.$route.fullPath
-     
+      this.getSingerDetail()
     },
     mounted() {
     },
     methods: {
-      
+      async getSingerDetail() {
+        if(!this.singer.id) {
+          this.$router.push('/singer')
+          return 
+        }
+        let result = await reqSingerDetail(this.singer.id)
+        this.songs = this._normalizeSongs(result.data.data.list)
+        console.log(this.songs, 'ppppppppppppp')
+      },
+      _normalizeSongs(list) {
+        let res = []
+        list.forEach(item => {
+          let {musicData} = item
+          res.push[createSong(musicData)]
+        });
+        console.log(res, '-------------')
+        return res
+      }
     },
     watch: {
       myRouter(val,oVal) {

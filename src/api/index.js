@@ -53,4 +53,10 @@ var data = {
   format: 'json'
 }
 
+//获取歌手详情列表
+export const reqSingerDetail = (id) => ajax.get(`/reqSingerDetail`, {
+  params: {
+    id: id
+  }
+})
 
