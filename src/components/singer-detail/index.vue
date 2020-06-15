@@ -1,5 +1,5 @@
 <template>
-    <music-list :bgImage="singer.avatar" :songs="songs"></music-list>
+    <music-list :title="singer.name" :bgImage="singer.avatar" :songs="songs"></music-list>
 </template>
 
 <script type="text/ecmascript-6">
@@ -9,7 +9,6 @@
   import {createSong} from 'common/js/song.js'
   export default {
     name: 'SingerDetail',
-    
     computed: {
       ...mapGetters([
         'singer'
@@ -40,9 +39,8 @@
         let res = []
         list.forEach(item => {
           let {musicData} = item
-          res.push[createSong(musicData)]
+          res.push(createSong(musicData))
         });
-        console.log(res, '-------------')
         return res
       }
     },

@@ -30,9 +30,6 @@
   import Scroll from 'base/scroll'
   import SongList from 'base/songList/song-list.vue'
   
-
-  const RESERVED_HEIGHT = 40
- 
   export default {
     props: {
       bgImage: {
@@ -69,9 +66,6 @@
       this.listenScroll = true
     },
     mounted() {
-      this.imageHeight = this.$refs.bgImage.clientHeight
-      this.minTransalteY = -this.imageHeight + RESERVED_HEIGHT
-      this.$refs.list.$el.style.top = `${this.imageHeight}px`
     },
     methods: {
       
