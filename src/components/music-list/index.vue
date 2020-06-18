@@ -1,23 +1,24 @@
 <template>
   <div class="music-list">
-    <div class="back" >
+    <div class="back" @click="back">
       <i class="icon-back"></i>
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div ref="playBtn" v-show="songs.length>0" class="play">
+        <div ref="playBtn" v-show="songs.length>0" class="play" >
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
       </div>
       <div class="filter" ref="filter"></div>
     </div>
+    <!-- 为设置滚动 -->
     <div class="bg-layer" ref="layer"></div>
     <scroll :data="songs"
             :listen-scroll="listenScroll" :probe-type="probeType" class="list" ref="list">
       <div class="song-list-wrapper">
-        <song-list :songs="songs" :rank="rank"></song-list>
+        <song-list :songs="songs"></song-list>
       </div>
       <!-- <div v-show="!songs.length" class="loading-container">
         <loading></loading>
@@ -28,8 +29,11 @@
 
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll'
-  import SongList from 'base/songList/song-list.vue'
+  // import Loading from 'base/loading/loading'
+  import SongList from 'base/songList/song-list'
   
+
+
   export default {
     props: {
       bgImage: {
@@ -38,7 +42,7 @@
       },
       songs: {
         type: Array,
-        default: function() {
+        function () {
           return []
         }
       },
@@ -66,14 +70,18 @@
       this.listenScroll = true
     },
     mounted() {
+      this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px`
     },
     methods: {
-      
-     
+      back() {
+        this.$router.back()
+      },
     },
-    
+    watch: {
+    },
     components: {
       Scroll,
+      // Loading,
       SongList
     }
   }
