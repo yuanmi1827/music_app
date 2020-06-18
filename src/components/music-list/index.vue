@@ -1,24 +1,23 @@
 <template>
   <div class="music-list">
-    <div class="back" @click="back">
+    <div class="back" >
       <i class="icon-back"></i>
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div ref="playBtn" v-show="songs.length>0" class="play" >
+        <div ref="playBtn" v-show="songs.length>0" class="play">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
       </div>
       <div class="filter" ref="filter"></div>
     </div>
-    <!-- 为设置滚动 -->
     <div class="bg-layer" ref="layer"></div>
     <scroll :data="songs" @scroll="scroll"
             :listen-scroll="listenScroll" :probe-type="probeType" class="list" ref="list">
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list :songs="songs" :rank="rank"></song-list>
       </div>
       <!-- <div v-show="!songs.length" class="loading-container">
         <loading></loading>
@@ -29,18 +28,10 @@
 
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll'
-<<<<<<< HEAD
-  // import Loading from 'base/loading/loading'
-  import SongList from 'base/songList/song-list'
-  
-
-
-=======
   import SongList from 'base/songList/song-list.vue'
   import {prefixStyle} from 'common/js/dom.js'
   const RERSERVE_HEIGHT = 44
   const transform = prefixStyle('transform')
->>>>>>> f74c4188c1977591cf56c00bfe5eafa46ee1e8cd
   export default {
     props: {
       bgImage: {
@@ -49,7 +40,7 @@
       },
       songs: {
         type: Array,
-        function () {
+        default: function() {
           return []
         }
       },
@@ -78,16 +69,6 @@
       this.listenScroll = true
     },
     mounted() {
-<<<<<<< HEAD
-      this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px`
-    },
-    methods: {
-      back() {
-        this.$router.back()
-      },
-    },
-    watch: {
-=======
       const imageHeight = this.$refs.bgImage.clientHeight
       this.$refs.list.$el.style.top = imageHeight+'px'
       this.minScrollY = -imageHeight + RERSERVE_HEIGHT
@@ -126,11 +107,9 @@
         this.$refs.bgImage.style[transform] = `scale(${scale})`
         this.$refs.bgImage.style.zIndex = zIndex
       }
->>>>>>> f74c4188c1977591cf56c00bfe5eafa46ee1e8cd
     },
     components: {
       Scroll,
-      // Loading,
       SongList
     }
   }
