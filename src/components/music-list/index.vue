@@ -15,7 +15,7 @@
     </div>
     <!-- 为设置滚动 -->
     <div class="bg-layer" ref="layer"></div>
-    <scroll :data="songs"
+    <scroll :data="songs" @scroll="scroll"
             :listen-scroll="listenScroll" :probe-type="probeType" class="list" ref="list">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
@@ -29,11 +29,18 @@
 
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll'
+<<<<<<< HEAD
   // import Loading from 'base/loading/loading'
   import SongList from 'base/songList/song-list'
   
 
 
+=======
+  import SongList from 'base/songList/song-list.vue'
+  import {prefixStyle} from 'common/js/dom.js'
+  const RERSERVE_HEIGHT = 44
+  const transform = prefixStyle('transform')
+>>>>>>> f74c4188c1977591cf56c00bfe5eafa46ee1e8cd
   export default {
     props: {
       bgImage: {
@@ -57,7 +64,8 @@
     },
     data() {
       return {
-        scrollY: 0
+        scrollY: 0,
+        minScrollY: 0,//layer最小滚动距离
       }
     },
     computed: {
@@ -70,6 +78,7 @@
       this.listenScroll = true
     },
     mounted() {
+<<<<<<< HEAD
       this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px`
     },
     methods: {
@@ -78,6 +87,46 @@
       },
     },
     watch: {
+=======
+      const imageHeight = this.$refs.bgImage.clientHeight
+      this.$refs.list.$el.style.top = imageHeight+'px'
+      this.minScrollY = -imageHeight + RERSERVE_HEIGHT
+    },
+    methods: {
+      scroll(pos) {
+        this.scrollY = pos.y
+
+
+      }
+    },
+    watch: {
+      scrollY(newY) {
+        let translateY = Math.max(this.minScrollY, newY)
+        let zIndex = 0 // 设置背景图zIndex
+        //下拉图片跟随放大
+        let scale = 1
+        const percent = Math.abs(newY/this.minScrollY)
+        if (newY > 0) {
+          zIndex = 10
+          scale = scale + percent
+        }
+        this.$refs.layer.style[transform]= `translate3d(0, ${translateY}px, 0)`
+        if (newY < this.minScrollY) {
+          zIndex = 10
+          this.$refs.bgImage.style.paddingTop = 0
+          this.$refs.bgImage.style.height = `${RERSERVE_HEIGHT}px`
+          this.$refs.playBtn.style.display = 'none'
+        } else {
+          this.$refs.bgImage.style.paddingTop = '70%'
+          this.$refs.bgImage.style.height = 0
+          this.$refs.playBtn.style.display = ''
+
+        }
+        //
+        this.$refs.bgImage.style[transform] = `scale(${scale})`
+        this.$refs.bgImage.style.zIndex = zIndex
+      }
+>>>>>>> f74c4188c1977591cf56c00bfe5eafa46ee1e8cd
     },
     components: {
       Scroll,
