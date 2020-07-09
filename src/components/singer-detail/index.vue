@@ -24,6 +24,7 @@
       this.getSingerDetail()
     },
     mounted() {
+      console.log(this.singer)
     },
     methods: {
       async getSingerDetail() {
@@ -33,7 +34,6 @@
         }
         let result = await reqSingerDetail(this.singer.id)
         this.songs = this._normalizeSongs(result.data.data.list)
-        console.log(this.songs, 'ppppppppppppp')
       },
       _normalizeSongs(list) {
         let res = []

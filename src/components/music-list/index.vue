@@ -17,7 +17,7 @@
     <scroll :data="songs" @scroll="scroll"
             :listen-scroll="listenScroll" :probe-type="probeType" class="list" ref="list">
       <div class="song-list-wrapper">
-        <song-list :songs="songs" :rank="rank"></song-list>
+        <song-list @select="selectSong" :songs="songs" :rank="rank"></song-list>
       </div>
       <!-- <div v-show="!songs.length" class="loading-container">
         <loading></loading>
@@ -27,6 +27,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import {mapActions} from 'vuex'
   import Scroll from 'base/scroll'
   import SongList from 'base/songList/song-list.vue'
   import {prefixStyle} from 'common/js/dom.js'
@@ -74,11 +75,22 @@
       this.minScrollY = -imageHeight + RERSERVE_HEIGHT
     },
     methods: {
+      selectSong(song, index) {
+        this.selectPlay({
+          list: this.songs,
+          index
+        })
+
+      },
       scroll(pos) {
         this.scrollY = pos.y
-
-
-      }
+      },
+      back() {
+        this.$router.back()
+      },
+      ...mapActions([
+        'selectPlay'
+      ])
     },
     watch: {
       scrollY(newY) {

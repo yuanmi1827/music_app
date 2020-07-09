@@ -60,3 +60,10 @@ export const reqSingerDetail = (id) => ajax.get(`/reqSingerDetail`, {
   }
 })
 
+// 歌手/歌曲搜索
+export const reqSearchSingerOrSong = (keywords) => ajax.get(`/reqSearchSingerOrSong`,{
+  params: {
+    key: encodeURIComponent(keywords)
+  }
+})
+

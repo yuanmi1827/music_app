@@ -1,14 +1,284 @@
 <template>
   <div class="player">
-      <div class="normal-player">
+    <transition name="normal"
+      @enter="enter"
+      @after-enter="afterEnter"
+      @leave="leave"
+      @after-leave="afterLeave"
+    >
+      <div class="normal-player" v-show="fullScreen">
+        <div class="background" >
+          <img  width="100%" height="100%" :src="currentSong.image">
+        </div>
+        <div class="top">
+          <div class="back" @click="back">
+            <i class="icon-back"></i>
+          </div>
+          <h1 class="title" v-html="currentSong.name"></h1>
+          <h2 class="subtitle" v-html="currentSong.singer"></h2>
+        </div>
+        <div class="middle">
+          <div class="middle-l" ref="middleL">
+            <div class="cd-wrapper" ref="cdWrapper">
+              <div class="cd"  :class="cdCls">
+                <img class="image" :src="currentSong.image">
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        <div class="bottom">
+          <div class="dot-wrapper">
+            <span class="dot" ></span>
+            <span class="dot" ></span>
+          </div>
+          <div class="progress-wrapper">
+            <span class="time time-l">{{format(currentTime)}}</span>
+            <div class="progress-bar-wrapper">
+              <progress-bar @changeByBtn="percentChange" :percent="percent"></progress-bar>
+            </div>
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
+          </div>
+          <div class="operators">
+            <div class="icon i-left">
+              <i class="icon-sequence"></i>
+            </div>
+            <div class="icon i-left">
+              <i class="icon-prev" @click="prev"></i>
+            </div>
+            <div class="icon i-center">
+              <i :class="playIcon" @click="togglePlaying"></i>
+            </div>
+            <div class="icon i-right">
+              <i class="icon-next" @click="next"></i>
+            </div>
+            <div class="icon i-right" >
+              <i class="icon icon-not-favorite"></i>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="mini-player">
+    </transition>
+    <transition name="mini">
+      <div class="mini-player" v-show="!fullScreen" @click="open">
+        <div class="icon"  >
+          <img :class="cdCls" width="40" height="40" :src="currentSong.image">
+        </div>
+        <div class="text">
+          <h2 class="name" v-html="currentSong.name"></h2>
+          <p class="desc" v-html="currentSong.singer"></p>
+        </div>
+        <div class="control" >
+          <progress-circle :radius="32" :percent="percent">
+            <i class="icon-mini" :class="miniIcon" @click.stop="togglePlaying"></i>
+          </progress-circle>
+        </div>
+        <div class="control">
+          <i class="icon-playlist"></i>
+        </div>
       </div>
+    </transition>
+    <audio ref="audio" src='../../common/mp3/Mojito.mp3' @play="ready" @error="error" @timeupdate="updateTime"></audio>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import animations from 'create-keyframe-animation'
+import {mapGetters, mapActions, mapMutations} from 'vuex'
+import { prefixStyle } from "common/js/dom.js"
+import ProgressBar from 'base/progress-bar'
+import ProgressCircle from 'base/progress-circle'
+const transform = prefixStyle('transform')
   export default {
+    data() {
+      return {
+        songReady: false,
+        currentTime: 0, // 音乐播放当前时间
+      }
+    },
+
+    computed: {
+      // 播放和暂停图片切换
+      playIcon() {
+        return this.playing? 'icon-pause': 'icon-play'
+      },
+      // 音乐播放时图片转动
+      cdCls() {
+        return this.playing? 'play' : 'play pause'
+      },
+      // 音乐播放占比
+      percent() {
+        return this.currentTime / this.currentSong.duration
+      },
+      // mini
+      miniIcon() {
+        return this.playing? 'icon-pause-mini': 'icon-play-mini'
+      },
+      ...mapGetters([
+        'playing',
+        'fullScreen',
+        'currentSong',
+        'currentIndex',
+        'playList'
+      ])
+    },
+    methods: {
+      //back 点击收起全屏
+      back() {
+        this.setFullScreen(false)
+      },
+      // 展开全屏
+      open() {
+        this.setFullScreen(true)
+      },
+      // 暂停或者播放
+      togglePlaying() {
+        if(!this.songReady) {
+          return
+        }
+        this.setPlayingState(!this.playing)
+      },
+      //audio标签设置
+      ready() {
+        this.songReady = true
+      },
+      error() {
+        this.songReady = true
+      },
+      updateTime(e) {
+        this.currentTime = e.target.currentTime
+      },
+      // 对时间进行格式化处理
+      format(interval) {
+        interval = interval | 0
+        const minute = interval / 60 | 0
+        const second =  this._pad(interval % 60)
+        return `${minute}:${second}`
+      },
+      // 进度条改变
+      percentChange(percent) {
+        this.currentTime = this.currentSong.duration * percent
+        this.$refs.audio.currentTime = this.currentTime
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+      },
+      // 对个位数实行补0
+      _pad(num, n=2) {
+        let len = num.toString().length
+        while(len < n) {
+          num = '0' + num
+          len++
+        }
+        return num
+      },
+      // bottom 操作
+      prev() {
+        let index = this.currentIndex-1
+        if(index = -1) {
+          index = this.playList.length-1
+        }
+        this.setCurrentIndex(index)
+        if(!this.playing) {
+          this.togglePlaying()
+        }
+        this.songReady = false
+      },
+      next() {
+        let index = this.currentIndex + 1
+        if(index === this.playList.length ) {
+          index = 0
+        }
+        this.setCurrentIndex(index)
+        if(!this.playing) {
+          this.togglePlaying()
+        }
+        this.songReady = false
+      },
+      // 动画相关
+      enter(el, done) {
+        const {x, y, scale} = this._getPosAndScale()
+        let animation = {
+          0: {
+            transform: `translate3d(${x}px, ${y}px, ${0}) scale(${scale})`
+          },
+          60: {
+            transform: `translate3d(${0}, ${0}, ${0}) scale(${1.1})`
+          },
+          100: {
+            transform: `translate3d(${0}, ${0}, ${0}) scale(${1})`
+          }
+        }
+        animations.registerAnimation({
+          name: 'move',
+          animation,
+          presets: {
+            duration: 600,
+            easing: 'linear'
+          }
+        })
+        animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+      },
+      afterEnter() {
+        animations.unregisterAnimation('move')
+
+        this.$refs.cdWrapper.style.animation = ''
+      },
+      leave(el, done) {
+        this.$refs.cdWrapper.style.transition = 'all 0.6s'
+        const {x, y, scale} = this._getPosAndScale()
+        this.$refs.cdWrapper.style[transform]= `translate3d(${x}px, ${y}px, 0px) scale(${scale})`
+        this.$refs.cdWrapper.addEventListener('transitionend', done)
+      },
+      afterLeave() {
+        
+        this.$refs.cdWrapper.style.transition = ''
+        this.$refs.cdWrapper.style[transform] = ''
+
+      },
+      _getPosAndScale() {
+        // 底部mini 部分
+        const targetWidth = 40 // 底部图片宽
+        const paddingLeft = 40 // 底部图片左侧padding
+        const paddingBottom = 30 // 
+        // 全屏时 图片距离顶部
+        const paddingTop = 80
+        const width = window.innerWidth * 0.8
+        const scale = targetWidth / width
+        const x = -(window.innerWidth/2  - paddingLeft)
+        const y = window.innerHeight - paddingTop - width/2 - paddingBottom
+        return {
+          x,
+          y,
+          scale
+        }
+      },
+      ...mapMutations({
+        setFullScreen: 'SET_FULL_SCREEN',
+        setPlayingState: 'SET_PLAYING_STATE',
+        setCurrentIndex: 'SET_CURRENT_INDEX'
+      }),
+      ...mapActions([
+
+      ])
+    },
+    watch: {
+      playing(value) {
+        const audio = this.$refs.audio
+        this.$nextTick(() => {
+          value? audio.play() : audio.pause()
+        })
+      },
+      currentSong(newSong, oldSong) {
+        if(!newSong.id) return
+        if(newSong.id === oldSong.id) return
+        
+      }
+    },
+    components: {
+      ProgressBar,
+      ProgressCircle
+    }
   }
 </script>
 
@@ -24,6 +294,7 @@
       top: 0
       bottom: 0
       z-index: 150
+      color white
       background: $color-background
       .background
         position: absolute
